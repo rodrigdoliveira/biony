@@ -1,0 +1,377 @@
+var app = angular.module('webBioSPPy', []); 
+app.controller('storageController', function($scope) {
+
+    $scope.biosignals = []
+    $scope.groups = []
+    $scope.biosignalGroups = []
+    $scope.createBiosignalBox = false;
+    $scope.createGroupBox = false;
+    $scope.addToGroupBox = false;
+    $scope.clickedGroup = "";
+    $scope.shareWithGroupBox = false;
+    $scope.deleteBiosignalBox = false;
+    $scope.clickedBiosignal = "";
+    $scope.biosignalToDelete = null;
+    $scope.clickedbiosignalGroup = "";
+    $scope.shareWithBiosignalGroupBox = false;
+    $scope.groupMembersGroupBox = false;
+    $scope.groupMembers = []
+    $scope.favBiosignals = 0;
+
+    $scope.showTypeFilterBox = false;
+    $scope.typeFilter = null;
+
+    $scope.colors = {"resp":"<%= current_user.respColor %>", "eda":"<%= current_user.edaColor %>",
+                "emg":"<%= current_user.emgColor %>","bvp":"<%= current_user.bvpColor %>",
+                "eeg":"<%= current_user.eegColor %>", "ecg":"<%= current_user.ecgColor %>"}
+
+    $('#biosignalsDiv_wrapper').on('mousewheel DOMMouseScroll', function(event){
+        var delta = Math.max(-1, Math.min(1, (event.originalEvent.wheelDelta || -event.originalEvent.detail)));
+        $(this).scrollLeft( $(this).scrollLeft() - ( delta * 20 ) );
+        event.preventDefault();
+    });
+
+    $('#groupsDiv_wrapper').on('mousewheel DOMMouseScroll', function(event){
+        var delta = Math.max(-1, Math.min(1, (event.originalEvent.wheelDelta || -event.originalEvent.detail)));
+        $(this).scrollLeft( $(this).scrollLeft() - ( delta * 20 ) );
+        event.preventDefault();
+    });
+
+    $scope.getMembers = function(group){
+        $.ajax({
+            type: "GET",
+            url: "/groups/"+group._id.$oid+"/members",
+            success: function(data){
+                console.log(data)
+                if(data["result"]){
+                    $scope.groupMembers = data["members"];
+                    $scope.groupMembersGroupBox = true;
+                    $scope.$apply();
+                }
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                //$scope.loading = false;
+                $scope.$apply();
+            }
+        });
+    }
+
+    $scope.changeFavStatus = function(biosignalObj, biosignalId){
+        backupState = biosignalObj.isFav
+        flagIsFav = biosignalObj.isFav
+        biosignalObj.isFav = !flagIsFav;
+        $.ajax({
+            type: "POST",
+            url: "/biosignals/"+ biosignalId.$oid +"/addToFavorites",
+            success: function(data){
+                if(!data["result"]){
+                    biosignalObj.isFav = backupState
+                } else{
+                    if(flagIsFav){
+                        $scope.favBiosignals--;
+                    } else{
+                        $scope.favBiosignals++;
+                    }
+                }
+                $scope.$apply();
+            },
+            error: function(textStatus, errorThrown){
+                biosignalObj.isFav = backupState
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                $scope.$apply();
+            }
+        });
+    }
+
+    $scope.preDeleteBiosignal = function(biosignalObj, biosignalId){
+        $scope.clickedBiosignal = biosignalId.$oid;
+        $scope.biosignalToDelete = biosignalObj;
+        console.log(biosignalObj)
+        $scope.deleteBiosignalBox = true;
+    }
+
+    $scope.deleteBiosignal = function(){
+        $scope.deleteBiosignalBox = false;
+        $.ajax({
+            type: "DELETE",
+            url: "/biosignals/"+ $scope.clickedBiosignal,
+            success: function(data){
+                if($scope.biosignalToDelete.isFav)
+                        $scope.favBiosignals--;
+                if(data["result"]){
+                    $scope.biosignals = $scope.biosignals.filter(function(biosignal){ 
+                        return biosignal._id.$oid != $scope.clickedBiosignal; 
+                    })
+                }
+                $scope.$apply();
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                $scope.$apply();
+            }
+        });
+    }
+
+    $scope.preShareWithGroup = function(biosignal){
+        $scope.clickedBiosignal = biosignal.$oid;
+        $scope.shareWithGroupBox = true;
+    }
+
+    $scope.preShareBiosignalGroup = function(biosignalGroup){
+        $scope.clickedbiosignalGroup = biosignalGroup.$oid;
+        $scope.shareWithBiosignalGroupBox = true;
+    }
+
+    $scope.preAddToBiosignalGroup = function(group){
+        $scope.clickedbiosignalGroup = group.$oid;
+        $scope.addToBiosignalGroupBox = true;
+    }
+
+
+    $scope.preAddToGroup = function(group){
+        $scope.clickedGroup = group.$oid;
+        $scope.addToGroupBox = true;
+    }
+
+    $scope.shareWithBiosignalGroup = function(){
+        var idToAdd = $("#selectBiosignalToGroup option:selected").val().split(":")[1] // string:ObjectID
+        $.ajax({
+            type: "POST",
+            url: "/biosignalgroups/"+ $scope.clickedbiosignalGroup +"/shareBiosignal",
+            data: { 'biosignal': idToAdd },
+            success: function(data){
+                if(data["result"])
+                    console.log("ok");
+                $scope.addToBiosignalGroupBox = false;
+                $scope.$apply();
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                //$scope.loading = false;
+                $scope.addToBiosignalGroupBox = false;
+                $scope.$apply();
+            }
+        });
+    }
+
+    $scope.shareBiosignalGroup = function(){
+        console.log($scope.clickedbiosignalGroup)
+        $.ajax({
+            type: "POST",
+            url: "/biosignalgroups/"+ $scope.clickedbiosignalGroup +"/share",
+            data: { 'group': $("#group2_group_id option:selected").val()},
+            success: function(data){
+                if(data["result"])
+                    window.location.reload()
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                //$scope.loading = false;
+                $scope.$apply();
+            }
+        });
+    }
+
+    $scope.shareWithGroup = function(){
+        $.ajax({
+            type: "POST",
+            url: "/biosignals/"+ $scope.clickedBiosignal +"/shareGroup",
+            data: { 'group': $("#group_group_id option:selected").val()},
+            success: function(data){
+                if(data["result"])
+                    window.location.reload()
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                //$scope.loading = false;
+                $scope.$apply();
+            }
+        });
+    }
+
+    $scope.addToGroup = function(){
+        $.ajax({
+            type: "POST",
+            url: "/groups/"+ $scope.clickedGroup +"/addUser",
+            data: { 'userEmail': $("#emailInput").val()},
+            success: function(data){
+                if(data["result"])
+                    window.location.reload()
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                //$scope.loading = false;
+                $scope.$apply();
+            }
+        });
+        $scope.clickedGroup = "";
+        $scope.addToGroupBox = false;
+    }
+
+    $scope.getUserBiosignals = function(){
+        $.ajax({
+            type: "GET",
+            url: "/biosignals/getUserBiosignals",
+            success: function(data){
+                //console.log(data);
+                for(i=0; i < data.length; i++){
+                    if(data[i].isFav)
+                        $scope.favBiosignals++;
+                }
+                $scope.didSearch = false;
+                $scope.biosignals = data
+                $scope.loading = false;
+                $scope.$apply();
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                //$scope.loading = false;
+                $scope.$apply();
+            }
+        });
+    }
+
+    $scope.populate = function(){
+
+        $scope.getUserBiosignals();
+
+        $.ajax({
+            type: "GET",
+            url: "/groups/getUserGroups",
+            success: function(data){
+                //console.log(data);
+                $scope.groups = data
+                //$scope.loading = false;
+                $scope.$apply();
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                //$scope.loading = false;
+                $scope.$apply();
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: "/biosignalgroups/getUserBiosignalGroups",
+            success: function(data){
+                console.log(data);
+                $scope.biosignalGroups = data
+                //$scope.loading = false;
+                $scope.$apply();
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                //$scope.loading = false;
+                $scope.$apply();
+            }
+        });
+    }
+
+    $scope.goToSignal = function(signal){
+        $scope.loading = true;
+        window.location.href="/biosignals/"+signal.$oid;
+        $window.location.reload(true);
+        //$scope.loading = false;
+        $scope.$apply();
+    }
+
+    $scope.goToBiosignalGroup = function(group){
+        window.location.href="/biosignalgroups/"+group.$oid;
+        $window.location.reload(true);
+        $scope.$apply();
+    }
+
+    $scope.changeTypeFilter = function(){
+        selectedType = $("#typeInput option:selected").val()
+        if(selectedType == "" || selectedType == null){
+            alert("You need to select a valid type!");
+            return;
+        }
+
+        if($scope.typeFilter != selectedType){
+            $scope.changed = true;
+            $scope.typeFilter = selectedType;
+            $scope.advancedSearch();
+        }
+
+        $scope.showTypeFilterBox = false;
+    }
+
+    $scope.removeTypeFilter = function(){
+        $scope.typeFilter = null;
+        $scope.changed = true;
+    }
+
+    $scope.didSearch = false;
+    $scope.advancedSearch = function(){
+        if(!$scope.changed) return;
+
+        $scope.loading = true;
+        $.ajax({
+            type: "GET",
+            url: "/biosignals/advancedSearch",
+            data: { 'type': $scope.typeFilter },
+            success: function(data){
+                console.log(data);
+                for(i=0; i < data.length; i++){
+                    if(data[i].isFav)
+                        $scope.favBiosignals++;
+                }
+                $scope.didSearch = true
+                $scope.biosignals = data
+                //$scope.loading = false;
+                $scope.$apply();
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                $scope.loading = false;
+                $scope.$apply();
+            }
+        });
+        $scope.changed = false;
+    }
+
+    $scope.reset = function(){
+        if(!$scope.didSearch) return;
+
+        $scope.loading = true;
+        $scope.removeTypeFilter();
+        $scope.getUserBiosignals();
+
+    }
+
+    $scope.shouldFilter = false;
+    $scope.stringToSearch = "";
+
+    $('input[name="search"]').keyup(function(){
+        searchValue = $(this).val();
+
+        if(searchValue){
+            $scope.stringToSearch = searchValue;
+            $scope.shouldFilter = true;
+        } else {
+            $scope.stringToSearch = "";
+            $scope.shouldFilter = false;
+        }
+
+        $scope.$apply();
+    });
+    
+
+    $scope.searchFilter = function (biosignal) {
+        return !$scope.shouldFilter || (biosignal.name.toLowerCase()).includes($scope.stringToSearch.toLowerCase()); 
+    };
+});

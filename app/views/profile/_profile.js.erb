@@ -1,0 +1,25 @@
+var app = angular.module('webBioSPPy', []); 
+app.controller('profileController', function($scope) {
+
+    $(".colorInput").on('change', function(){
+
+        dataToSend = {}
+        dataToSend[this.id] = this.value
+
+        $.ajax({
+            type: "POST",
+            url: "/profile/changeColor",
+            data: dataToSend,
+            success: function(data){
+                if(data["result"])
+                    console.log("ok");
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+            }
+        });
+        console.log(this.id);
+    });
+
+});

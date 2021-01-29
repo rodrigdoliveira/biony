@@ -1,0 +1,223 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, or any plugin's
+ * vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ *= require jquery-ui
+ *= require_tree .
+ *= require_self
+ */
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+
+div.ui-slider-range.ui-widget-header {
+  background: rgb(0, 252, 159);
+}
+
+div.ui-widget-content {
+  background:#161616;
+  border: none;
+}
+
+*:focus {
+  outline: none;
+}
+
+.search-container input[type=text] {
+  padding: 6px;
+  font-size: 14px;
+  border: none;
+  background: #262626;
+  color: white;
+}
+
+.search-container button {
+  background: #1d1d1d;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  color: rgba(157, 255, 219, 0.5);
+}
+
+
+#tooltipDiv {
+	display:none;
+  position: fixed;
+  z-index: 25;
+}
+
+.tooltipInnerDiv {
+  border:1px solid #333;
+	background-color:#161616;
+	border-radius:5px;
+	padding:10px;
+	color:#fff;
+  font-size:12px Arial;
+  margin-bottom: 0.2vw;
+}
+
+.unselectable {
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */      
+}
+
+.selectable {  
+  -webkit-user-select: all;  /* Chrome 49+ */
+  -moz-user-select: all;     /* Firefox 43+ */
+  -ms-user-select: all;      /* No support yet */
+  user-select: all;          /* Likely future */   
+}
+
+* {
+  font-family: 'Open Sans';
+  font-size: 0.7vw;
+}
+
+.boldText {
+  font-weight: bold;
+}
+
+.lightText {
+  font-weight : 100;
+}
+
+.axisWhite line{
+  stroke: white;
+}
+
+.axisWhite path{
+  stroke: white;
+}
+
+.axisWhite text{
+  font-family: 'Open Sans';
+  stroke: white;
+  font: 10px sans-serif;
+}
+
+//spinner
+.lds-ring {
+  display: inline-block;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 51px;
+  height: 51px;
+  margin: 6px;
+  border: 6px solid #fff;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #fff transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.trashIcon{
+  filter: grayscale(100%);
+  transition-duration: 0.3s;
+}
+
+.trashIcon:hover{
+  filter: grayscale(0%);
+  transition-duration: 0.3s;
+}
+
+.whiteToRedBtn{
+  color: white;
+}
+
+.whiteToRedBtn:hover{
+  filter: brightness(0.6) contrast(3.4) hue-rotate(217deg) saturate(3);
+}
+
+//end spinner
+
+.divHeader{
+  background: #1d1d1d; 
+  margin-left: -1vw; 
+  margin-right: -1vw; 
+  padding-left: 1vw; 
+  margin-bottom: 0.5vw;  
+  border-style: solid none solid none; 
+  border-color: rgba(157, 255, 219, 0.2); 
+  border-width: 1px;
+}
+
+.tooltip {
+  display:inline-block;
+  position:relative;
+  text-align:left;
+}
+
+.tooltip .right {
+  border-style: solid; 
+  border-color: rgba(157, 255, 219, 0.2); 
+  border-width: 1px;
+  min-width:5vw; 
+  right:0%;
+  transform:translate(100%, -50%);
+  padding:0 20px;
+  color:#FFFFFF;
+  background-color:#222222;
+  font-weight:normal;
+  font-size:13px;
+  border-radius:8px;
+  position:absolute;
+  z-index:99999999;
+  box-sizing:border-box;
+  box-shadow:0 1px 8px rgba(0,0,0,0.5);
+  display:none;
+}
+
+.tooltip:hover .right {
+  display:block;
+}
+
+.tooltip .right i {
+  position:absolute;
+  right:0%;
+  margin-left:-12px;
+  width:24px;
+  height:12px;
+  overflow:hidden;
+}
+
+.tooltip .right i::after {
+  content:'';
+  position:absolute;
+  width:12px;
+  height:12px;
+  right:0%;
+  background-color:#222222;
+  box-shadow:0 1px 8px rgba(0,0,0,0.5);
+}

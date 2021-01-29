@@ -1,0 +1,96 @@
+var app = angular.module('webBioSPPy', []); 
+app.controller('biosignalController', function($scope) {
+    <%= render "biosignals/basic.js" %>
+
+    $scope.initSignal = function(signalId){
+        $scope.loading = true;
+        $.ajax({
+            type: "GET",
+            url: "/biosignals/" + signalId + "/d3/",
+            success: function(data){
+                $scope.biosignal = data;
+
+                if(!$scope.biosignal.annotations){
+                    $scope.biosignal.annotations = []
+                }
+
+                processedData = JSON.parse($scope.biosignal.processedData)
+
+                var j=0;
+
+                signalData = {}
+                signalData["type"] = "none"
+                signalData["processedData"] = {}
+                signalData["processedData"]["x"] = JSON.parse(processedData.ts)
+                signalData["processedData"]["extraLines"] = []
+                signalData["idx"] = j;
+                signalData["annotations"] = $scope.biosignal.annotations.filter(function (el) { return el.innerIdx == j; });
+                signalData["annotationTooltip"] = []
+                if(signalData["annotations"]){
+                    for(a = 0; a < signalData["annotations"].length; a++){
+                        signalData["annotationTooltip"].push(false);
+                    }
+                }
+                
+                $scope.rawSignal = []
+                rawSignalArray = $scope.biosignal.rawSignal.split("\n");
+                for(i=0; i < rawSignalArray.length ; i++){
+                    if(rawSignalArray[i] != "" && rawSignalArray[i][0] != "#"){
+                        $scope.rawSignal.push(parseFloat(rawSignalArray[i]));
+                    }
+                }
+                signalData["processedData"]["y"] = $scope.rawSignal
+                $scope.signalsData.push(signalData);
+                $scope.initD3(signalData, false, "#rawSignal");
+                j += 1;
+
+                signalData = {}
+                signalData["type"] = "bvp"
+                signalData["processedData"] = {}
+                signalData["processedData"]["x"] = JSON.parse(processedData.ts)
+                signalData["processedData"]["extraLines"] = []
+                signalData["processedData"]["extraLines"].push($scope.newExtraLineObj("ONSETS", bvpOnsetColor, JSON.parse(processedData.onsets), "0"));
+                signalData["idx"] = j;
+                signalData["annotations"] = $scope.biosignal.annotations.filter(function (el) { return el.innerIdx == j; });
+                signalData["annotationTooltip"] = []
+                if(signalData["annotations"]){
+                    for(a = 0; a < signalData["annotations"].length; a++){
+                        signalData["annotationTooltip"].push(false);
+                    }
+                }
+                
+                $scope.signalsData.push(signalData);
+                signalData["processedData"]["y"] = JSON.parse(processedData.filtered)
+                $scope.initD3(signalData, false, "#filteredSignal");
+                j +=1 
+
+                signalData = {}
+                signalData["type"] = "none"
+                signalData["processedData"] = {}
+                signalData["processedData"]["x"] = JSON.parse(processedData.heart_rate_ts)
+                signalData["processedData"]["extraLines"] = []
+                signalData["idx"] = j;
+                signalData["annotations"] = $scope.biosignal.annotations.filter(function (el) { return el.innerIdx == j; });
+                signalData["annotationTooltip"] = []
+                if(signalData["annotations"]){
+                    for(a = 0; a < signalData["annotations"].length; a++){
+                        signalData["annotationTooltip"].push(false);
+                    }
+                }
+                
+                $scope.signalsData.push(signalData);
+                signalData["processedData"]["y"] = JSON.parse(processedData.heart_rate)
+                $scope.initD3(signalData, false, "#heartRate");
+                j +=1
+
+                $scope.loading = false;
+                $scope.$apply();
+            },
+            error: function(textStatus, errorThrown){
+                console.log("Status: " + JSON.stringify(textStatus)); 
+                console.log("Error: " + errorThrown);
+                $scope.$apply();
+            }
+        });
+    }
+});

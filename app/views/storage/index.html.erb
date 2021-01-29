@@ -1,0 +1,357 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<body ng-app="webBioSPPy" ng-controller="storageController" ng-init="populate()">
+    <div id="biosignalsDiv" style="margin-top: 0.7vw; background-color: #262626; overflow:auto; padding-left: 1vw; padding-right: 1vw; padding-bottom: 1vw;" >
+        <div id="biosignalsDiv_header" class="divHeader">
+            <p class="boldText" style="display:inline-block; color: white; font-size: 0.8vw; margin-bottom: 0;">BIOSIGNALS</p>
+            <div ng-click="createBiosignalBox = true" style="display:inline-block; cursor: pointer;"><p class="boldText" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">ADD BIOSIGNAL</p></div>
+            <div ng-click="showTypeFilterBox = true" style="display:inline-block; cursor: pointer;"><p class="boldText" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">SIGNAL TYPE FILTER</p></div>
+            <div style="display:block;" >
+                <div class="search-container" style="margin-bottom: 0.5vw;">
+                    <div style="display: inline-flex;">
+                        <button style="pointer-events: none;"><i class="fa fa-search"></i></button>
+                        <input type="text" placeholder="Search biosignal name..." name="search" id="biosignalNameSearch">
+                    </div>
+                </div>
+            </div>
+            <div style="margin-bottom: 0.5vw;">
+                <div ng-cloak ng-show="typeFilter != null" style="display: inline-block; margin-right: 0.5vw; border-radius: 0.6vw; background-color: #141414; padding: 0.3vw;">
+                    <p ng-click="reset()" style="display: inline-block; margin: 0; margin-right: 0.2vw; cursor: pointer; color: white;">X</p>
+                    <p class="boldText" style="display: inline-block; margin: 0; color: white; font-size: 0.5vw;">TYPE {{typeFilter}}</p>
+                </div>
+            </div>
+        </div>
+        <div id="biosignalsDiv_wrapper" style="overflow: hidden;" ng-cloak>
+            <div style="margin-bottom: 0.5vw; border-style: none none solid none; border-color: rgba(157, 255, 219, 0.2); border-width: 1px; padding-bottom: 0.5vw;" ng-show="favBiosignals > 0">
+                <p class="boldText" style="display:block; color: #9dffdb; font-size: 0.8vw; margin: 0 0 0.5vw 0;">FAVORITES</p>
+                <div id="biosignalsFavDiv_container" style="display: inline-flex;">
+                    <div ng-repeat="biosignal in biosignals | filter: { isFav : true } | filter: searchFilter" style="display: inline-block; margin-right: 0.5vw; position: relative;" ng-cloak>
+                        <%= render "storage/biosignalsDiv.erb" %>
+                        <div style="position: absolute; top: 0.3vw; right: 0.3vw;">
+                            <p class="boldText" ng-style="{'color' : colors[biosignal.signalType] }" style="margin: 0 0 0.2vw 0; font-size: 0.7vw;">{{biosignal.signalType | uppercase }}</p>
+                            <!--<div><div style="display: block; cursor: pointer; float: right;"><%= image_tag("edit.png", width: 15) %></div></div>-->
+                            <div style="float: right;">
+                            <div ng-show="biosignal.isFromGroup">
+                                <div class="tooltip" ><div style="display: block; cursor: pointer;"><%= image_tag("group.png", width: 15) %></div>
+                                    <div class="right">
+                                        <p>{{biosignal.groupName}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <% if @groups_length > 0 %><div title="Share biosignal with team" ng-click="preShareWithGroup(biosignal._id)" style="display: block; cursor: pointer; float: right;"><%= image_tag("share.png", width: 15) %></div><% end %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div id="biosignalsDiv_container" style="display: inline-flex;">
+                    <div ng-repeat="biosignal in biosignals  | filter: { isFav : false } | filter: searchFilter" style="display: inline-block; margin-right: 0.5vw; position: relative;" ng-cloak>
+                        <%= render "storage/biosignalsDiv.erb" %>
+                        <div style="position: absolute; top: 0.3vw; right: 0.3vw;">
+                            <p class="boldText" ng-style="{'color' : colors[biosignal.signalType] }" style="margin: 0 0 0.2vw 0; font-size: 0.7vw;">{{biosignal.signalType | uppercase }}</p>
+                            <!--<div><div style="display: block; cursor: pointer; float: right;"><%= image_tag("edit.png", width: 15) %></div></div>-->
+                            <div style="float: right;">
+                            <div ng-show="biosignal.isFromGroup">
+                                <div class="tooltip" ><div style="display: block; cursor: pointer;"><%= image_tag("group.png", width: 15) %></div>
+                                    <div class="right">
+                                        <p>{{biosignal.groupName}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <% if @groups_length > 0 %><div title="Share biosignal with team" ng-click="preShareWithGroup(biosignal._id)" style="display: block; cursor: pointer; float: right;"><%= image_tag("share.png", width: 15) %></div><% end %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="biosignalgroupsDiv" style="margin-top: 0.7vw; background-color: #262626; overflow:auto; padding-left: 1vw; padding-right: 1vw; padding-bottom: 1vw;" >
+        <div id="biosignalgroupsDiv_header" class="divHeader">
+            <p class="boldText" style="display:inline-block; color: white; font-size: 0.8vw;">GROUPS OF BIOSIGNALS</p>
+            <div ng-click="createBiosignalGroupBox = true" style="display:inline-block; cursor: pointer;"><p class="boldText" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">ADD BIOSIGNAL GROUP</p></div>
+            <div>
+                <div ng-cloak ng-show="false" style="display: inline-block; margin-right: 0.5vw; border-radius: 0.6vw; background-color: #1d1d1d; padding: 0.3vw;">
+                    <p class="boldText" style="display: inline-block; margin: 0; color: white; font-size: 0.5vw;"></p>
+                </div>
+            </div>
+        </div>
+        <div id="biosignalgroupsDiv_wrapper" style="overflow: hidden;">
+            <div id="biosignalgroupsDiv_container" style="display: inline-flex;">
+                <div ng-repeat="group in biosignalGroups" style="display: inline-block; margin-right: 0.5vw; position: relative;" ng-cloak>
+                    <div style="background-color: #303030; width: 12.4vw; min-height: 5vw; border-radius: 0.6vw;">
+                        <div style="display: flex; flex-flow:column; height: 100%;">
+                            <div style="flex: 0 1 auto; flex-wrap: wrap; display: flex; padding: 0.5vw 0 0.5vw 0.5vw;">
+                                <div>
+                                    <p class="boldText" style="color: white; overflow:hidden; display: inline-block; margin: 0;">{{ group.name }}</p>
+                                </div>
+                                <div>
+                                    <div style="margin-top: 0.3vw;">
+                                        <div style="display: inline-block; vertical-align: top;"><%= image_tag("info.png", width: 15) %></div>
+                                        <div style="display: inline-block; width: 10vw;"><p class="lightText" style="margin: 0; color: white; word-wrap: break-word; vertical-align: top;">{{ group.notes }}</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="flex: 1 1 auto; display: flex;">
+                                <div style="position: absolute; bottom: 0; height: 1.2vw; width: 12.4vw; background-color: #1d1d1d; border-radius: 0 0 0.6vw 0.6vw; cursor: pointer;">
+                                    <p ng-click="goToBiosignalGroup(group._id)" class="boldText" style="line-height: 0.2vw; align-self: flex-end; color: #9dffdb; font-size: 0.5vw; vertical-align: bottom; padding-left: 0.7vw;">VISUALIZE</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="position: absolute; top: 0.3vw; right: 0.3vw; display: inline-flex">
+                        <!--<div style="display: block; cursor: pointer;"><%= image_tag("edit.png", width: 15) %></div>--> 
+                        <div style="margin-right: 0.2vw;">
+                            <div ng-show="group.video.url">
+                                <div>
+                                    <div title="Contains acquisition video" style="display: block; cursor: pointer;"><%= image_tag("video.png", width: 15) %></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div title="Add biosignal" ng-click="preAddToBiosignalGroup(group._id)" style="display: block; cursor: pointer;"><%= image_tag("plus.png", width: 15) %></div>
+                            <% if @groups_length > 0 %><div title="Share biosignal group" ng-click="preShareBiosignalGroup(group._id)" style="display: block; cursor: pointer; float: right;"><%= image_tag("share.png", width: 15) %></div><% end %>
+                            <div ng-show="group.isFromGroup">
+                                <div class="tooltip" ><div style="display: block; cursor: pointer;"><%= image_tag("group.png", width: 15) %></div>
+                                    <div class="right">
+                                        <p>{{group.groupName}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="groupsDiv" style="margin-top: 0.7vw; background-color: #262626; overflow:auto; padding-left: 1vw; padding-right: 1vw; padding-bottom: 1vw;" >
+        <div id="groupsDiv_header" class="divHeader">
+            <p class="boldText" style="display:inline-block; color: white; font-size: 0.8vw;">TEAMS</p>
+            <div ng-click="createGroupBox = true" style="display:inline-block; cursor: pointer;"><p class="boldText" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">ADD TEAM</p></div>
+            <div>
+                <div ng-cloak ng-show="false" style="display: inline-block; margin-right: 0.5vw; border-radius: 0.6vw; background-color: #1d1d1d; padding: 0.3vw;">
+                    <p class="boldText" style="display: inline-block; margin: 0; color: white; font-size: 0.5vw;"></p>
+                </div>
+            </div>
+        </div>
+        <div id="groupsDiv_wrapper" style="overflow: hidden;">
+            <div id="groupsDiv_container" style="display: inline-flex;">
+                <div ng-repeat="group in groups" style="display: inline-block; margin-right: 0.5vw; position: relative;" ng-cloak>
+                    <div style="background-color: #303030; width: 12.4vw; min-height: 5vw; border-radius: 0.6vw;">
+                        <div style="display: flex; flex-flow:column; height: 100%;">
+                            <div style="flex: 0 1 auto; flex-wrap: wrap; display: flex; padding: 0.5vw 0 0.5vw 0.5vw;">
+                                <div>
+                                    <div style="display: inline-block; vertical-align: top;"><%= image_tag("group.png", width: 15) %></div>
+                                    <p class="boldText" style="color: white; overflow:hidden; display: inline-block; margin: 0;">{{ group.name }}</p>
+                                </div>
+                                <div>
+                                    <div>
+                                        <div style="display: inline-block;"><p class="lightText" style="margin: 0; color: white; overflow:hidden;">{{ group.total }} {{group.total > 1 ? "users" : "user"}}</p></div>
+                                    </div>
+                                    <div style="margin-top: 0.3vw;">
+                                        <div style="display: inline-block; vertical-align: top;"><%= image_tag("info.png", width: 15) %></div>
+                                        <div style="display: inline-block; width: 10vw;"><p class="lightText" style="margin: 0; color: white; word-wrap: break-word; vertical-align: top;">{{ group.notes }}</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="flex: 1 1 auto; display: flex;">
+                                <div style="height: 1.2vw; width: 12vw; background-color: #1d1d1d; border-radius: 0 0 0.6vw 0.6vw; padding-left: 0.7vw; cursor: pointer;">
+                                    <p ng-click="getMembers(group)" class="boldText" style="line-height: 0.2vw; align-self: flex-end; color: #9dffdb; font-size: 0.5vw; vertical-align: bottom;">VISUALIZE</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="position: absolute; top: 0.3vw; right: 0.3vw;">
+                        <!--<div style="display: block; cursor: pointer;"><%= image_tag("edit.png", width: 15) %></div>--> 
+                        <div title="Add user to team" ng-click="preAddToGroup(group._id)" style="display: block; cursor: pointer;"><%= image_tag("plus.png", width: 15) %></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="createBiosignalBox" ng-cloak id="createBiosignalDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="showcreateBiosignalDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">ADD BIOSIGNAL</p>
+                    <p ng-click="createBiosignalBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw; color: white;">
+                <%= form_for @biosignal_new do |f| %>
+                    <div style="margin-bottom: 1vw;">
+                        <%= f.label :name %><br>
+                        <%= f.text_field :name %><br>
+                        <%= f.label :date %><br>
+                        <%= f.datetime_select(:date, :order => [:day, :month, :year, :hour, :minute]) %><br>
+                        <%= f.label :notes %><br>
+                        <%= f.text_field :notes %><br>
+                        <%= f.file_field 'rawSignal', { required: true } %><br>
+                    </div>
+                    <%= submit_tag 'Create Biosignal' %>
+                <% end %>
+            </div>
+        </div>
+    </div>
+    <div ng-show="createGroupBox" ng-cloak id="createGroupDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="showcreateGroupDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">ADD TEAM</p>
+                    <p ng-click="createGroupBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw; color: white;">
+                <%= form_for @group_new do |f| %>
+                    <div style="margin-bottom: 1vw;">
+                        <%= f.label :name %><br>
+                        <%= f.text_field :name %><br>
+                        <%= f.label :notes %><br>
+                        <%= f.text_field :notes %><br>
+                    </div>
+                    <%= submit_tag 'Create Group' %>
+                <% end %>
+            </div>
+        </div>
+    </div>
+    <div ng-show="createBiosignalGroupBox" ng-cloak id="createGroupDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="showcreateBiosignalGroupDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">ADD GROUP</p>
+                    <p ng-click="createBiosignalGroupBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw; color: white;">
+                <%= form_for @biosignalGroup_new do |f| %>
+                    <div style="margin-bottom: 1vw;">
+                        <%= f.label :name %><br>
+                        <%= f.text_field :name %><br>
+                        <%= f.label :notes %><br>
+                        <%= f.text_field :notes %><br><br>
+                        <label>Select acquisition video</label><br><%= f.file_field :video, { required: true } %><br>
+                    </div>
+                    <%= submit_tag 'Create Group' %>
+                <% end %>
+            </div>
+        </div>
+    </div>
+    <div ng-show="addToGroupBox" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="addToGroupDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">ADD USER TO GROUP</p>
+                    <p ng-click="addToGroupBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <div style="margin-top: 0.5vw; color: white;"><label style="margin-right: 0.2vw;">User email </label><input style="width: 7vw;float: right;" id="emailInput"/></div>
+                <div ng-click="addToGroup()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">ADD USER</p></div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="deleteBiosignalBox" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="deleteBiosignalDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">ARE YOU SURE?</p>
+                    <p ng-click="deleteBiosignalBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <div style="margin: 0.3vw 0 1vw 0">
+                    <div style="display: inline-block;"><p class="boldText" style="color: white; overflow:hidden; width: 100%; display: inline-block; margin: 0 0.3vw 0 0;">{{ biosignalToDelete.name }}</p></div>
+                </div>
+                <div>
+                    <div>
+                        <div style="display: inline-block;"><%= image_tag("calendario.png", width: 15) %></div>
+                        <div style="display: inline-block;"><p class="lightText" style="margin: 0; color: white; overflow:hidden;">{{ biosignalToDelete.date | date:'dd/MM/yyyy - HH:mm' }}</p></div>
+                    </div>
+                    <div style="margin-top: 0.3vw;">
+                        <div style="display: inline-block; vertical-align: top;"><%= image_tag("info.png", width: 15) %></div>
+                        <div style="display: inline-block; width: 10vw;"><p class="lightText" style="margin: 0; color: white; word-wrap: break-word; vertical-align: top;">{{ biosignalToDelete.notes }}</p></div>
+                    </div>
+                </div>
+                <div ng-click="deleteBiosignal()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">DELETE</p></div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="addToBiosignalGroupBox" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="addToBiosignalGroupDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; margin-right: 1vw; line-height: 2vw; font-size: 0.5vw; ">ADD BIOSIGNAL TO GROUP</p>
+                    <p ng-click="addToBiosignalGroupBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <select id="selectBiosignalToGroup" ng-model="biosignalToAddToGroup" 
+                    ng-options="biosignal._id.$oid as biosignal.name for biosignal in biosignals"
+                    ng-init="biosignalToAddToGroup=null"></select>
+                <div ng-click="shareWithBiosignalGroup()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">ADD BIOSIGNAL</p></div>
+            </div>
+        </div>
+    </div>
+    <% if @groups_length > 0 %>
+    <div ng-show="shareWithGroupBox" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="shareWithGroupDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; margin-right: 1vw; line-height: 2vw; font-size: 0.5vw; ">SHARE BIOSIGNAL WITH TEAM</p>
+                    <p ng-click="shareWithGroupBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <%= collection_select(:group, :group_id, @groups.sort, :id, :name) %>
+                <div ng-click="shareWithGroup()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">SHARE BIOSIGNAL</p></div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="shareWithBiosignalGroupBox" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="shareWithBiosignalGroupDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; margin-right: 1vw; line-height: 2vw; font-size: 0.5vw; ">SHARE WITH TEAM</p>
+                    <p ng-click="shareWithBiosignalGroupBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <%= collection_select(:group2, :group_id, @groups.sort, :id, :name) %>
+                <div ng-click="shareBiosignalGroup()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">SHARE BIOSIGNALGROUP</p></div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="groupMembersGroupBox" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="groupMembersGroupDiv" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; margin-right: 1vw; line-height: 2vw; font-size: 0.5vw; ">GROUP MEMBERS</p>
+                    <p ng-click="groupMembersGroupBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <div ng-repeat="member in groupMembers" style="display: block; margin-right: 0.5vw; position: relative;" ng-cloak>
+                    <p style="color: white;">{{member}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% end %>
+    <div ng-show="showTypeFilterBox" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div id="TypeFilterDiv" style="position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">TYPE FILTER</p>
+                    <p ng-click="showTypeFilterBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <%= select_tag('typeInput', options_from_collection_for_select(@signalTypes, 'type', 'name'), prompt: "Select a type") %>
+                <div ng-click="changeTypeFilter()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">ADD FILTER</p></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        <%= raw Uglifier.new(:mangle => false).compile(render 'storage.js.erb') %>
+    </script>
+</body>

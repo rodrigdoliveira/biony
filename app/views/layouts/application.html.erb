@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Biosppy</title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body style="padding: 0; margin: 0; background: #141414">
+    <% if user_signed_in? %>
+    <div id="header" style="padding-left: 1vw; padding-right: 1vw; background-color: #262626; overflow:auto; border-style: none none solid none; border-color: #9dffdb; border-width: 1px;">
+      <div>
+        <div id="header_left" style="float: left;">
+          <a href= '/home' target="_self"><p class="boldText" style="display:inline-block; color: #9dffdb; margin-right: 1vw;">FAVORITES</p></a>
+          <a href= '/storage' target="_self"><p class="boldText" style="display:inline-block; color: #9dffdb; margin-right: 1vw;">STORAGE</p></a>
+          <a href= '/profile' target="_self"><p class="boldText" style="display:inline-block; color: #9dffdb; margin-right: 1vw;">PROFILE</p></a>
+        </div>
+        <div id="header_right" style="float: right;">
+          <a href= '<%="#{destroy_user_session_path}"%>'><p class="boldText" style="display:inline-block; color: #9dffdb;">LOGOUT</p></a>
+        </div>
+      </div>
+    </div>
+    <% end %>
+    <%= yield %>
+  </body>
+</html>

@@ -1,0 +1,75 @@
+<body ng-app="webBioSPPy" ng-controller="profileController">
+    <div style="padding: 1vw 12vw 0 12vw;">
+        <div id="profileDiv" style="margin-top: 0.7vw; background-color: #262626; overflow:auto; padding-left: 1vw; padding-right: 1vw; padding-bottom: 1vw; border-radius: 1vw; border: 0.1vw solid #9dffdb;" >
+            <div id="profileDiv_header" class="divHeader">
+                <p class="boldText" style="color: white; font-size: 0.8vw; text-align: center;">PROFILE</p>
+            </div>
+            <div id="profileDiv_wrapper" style="overflow: hidden;" ng-cloak>
+                <div style="margin-bottom: 1vw;">
+                    <p class="boldText" style="display:inline-block; color: #9dffdb; font-size: 0.8vw; margin-right: 1vw;">EMAIL</p><p style="display:inline-block; color: white; font-size: 0.8vw;"><%= current_user.email %></p>
+                </div>
+                <div style="margin-bottom: 1vw;">
+                    <p class="boldText" style="display:inline-block; color: #9dffdb; font-size: 0.8vw; margin-right: 1vw;">API TOKEN</p><p style="display:inline-block; color: white; font-size: 0.8vw;"><%= current_user.apiToken %></p>
+                </div>
+                <div>
+                    <p class="boldText" style="display:block; color: #9dffdb; font-size: 0.8vw; margin: 0 0 0.5vw 0;">COLORS</p>
+                    <div style="text-align: center;">
+                        <div style="display: inline-block; text-align: left;">
+                            <div style="padding: 0 0.5vw 0 0.5vw; display: inline-block; vertical-align: top;">
+                                <div style="margin-bottom: 1vw; ">
+                                    <input class="colorInput" id="bvpColor" type="color" value= '<%="#{current_user.bvpColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">Blood Volume Pulse (BVP)</p>
+                                    <input class="colorInput" id="bvpOnsetColor" type="color" value= '<%="#{current_user.bvpOnsetColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">ONSETS</p>
+                                </div>
+                            </div>
+                            <div style="padding: 0 0.5vw 0 0.5vw; display: inline-block; vertical-align: top; border-style: none none none solid; border-color: rgba(157, 255, 219, 0.2); border-width: 1px;">
+                                <div style="margin-bottom: 1vw; ">
+                                    <input class="colorInput" id="ecgColor" type="color" value= '<%="#{current_user.ecgColor}"%>'>
+                                    <p class="boldText" style=" color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">Electrocardiogram (ECG)</p>
+                                    <input class="colorInput" id="ecgRPeaksColor" type="color" value= '<%="#{current_user.ecgRPeaksColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">RPEAKS</p>
+                                </div>
+                            </div>
+                            <div style="padding: 0 0.5vw 0 0.5vw; display: inline-block; vertical-align: top; border-style: none none none solid;  border-color: rgba(157, 255, 219, 0.2); border-width: 1px;">
+                                <div style="margin-bottom: 1vw; ">
+                                    <input class="colorInput" id="edaColor" type="color" value= '<%="#{current_user.edaColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">Electrodermal Activity (EDA)</p>
+                                    <input class="colorInput" id="edaOnsetColor" type="color" value= '<%="#{current_user.edaOnsetColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">ONSETS</p>
+                                    <input class="colorInput" id="edaPeaksColor" type="color" value= '<%="#{current_user.edaPeaksColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">PEAKS</p>
+                                </div>
+                            </div>
+                            <div style="padding: 0 0.5vw 0 0.5vw; display: inline-block; vertical-align: top; border-style: none none none solid;  border-color: rgba(157, 255, 219, 0.2); border-width: 1px;">
+                                <div style="margin-bottom: 1vw; ">
+                                    <input class="colorInput" id="eegColor" type="color" value= '<%="#{current_user.eegColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">Electroencephalogram (EEG)</p>
+                                </div>
+                            </div>
+                            <div style="padding: 0 0.5vw 0 0.5vw; display: inline-block; vertical-align: top; border-style: none none none solid; border-color: rgba(157, 255, 219, 0.2); border-width: 1px;">
+                                <div style="margin-bottom: 1vw; ">
+                                    <input class="colorInput" id="emgColor" type="color" value= '<%="#{current_user.emgColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">Electromyography (EMG)</p>
+                                    <input class="colorInput" id="emgOnsetColor" type="color" value= '<%="#{current_user.emgOnsetColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">ONSETS</p>
+                                </div>
+                            </div>
+                            <div style="padding: 0 0.5vw 0 0.5vw; display: inline-block; vertical-align: top; border-style: none none none solid; border-color: rgba(157, 255, 219, 0.2); border-width: 1px;">
+                                <div style="margin-bottom: 1vw; ">
+                                    <input class="colorInput" id="respColor" type="color" value= '<%="#{current_user.respColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">Respiration (RESP)</p>
+                                    <input class="colorInput" id="respZerosColor" type="color" value= '<%="#{current_user.respZerosColor}"%>'>
+                                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 0; margin-right: 1vw;">ZEROS</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        <%= raw Uglifier.new(:mangle => false).compile(render 'profile.js.erb') %>
+    </script>
+</body>

@@ -1,0 +1,27 @@
+<div style="background-color: #303030; width: 12.4vw; min-height: 5vw; border-radius: 0.6vw;">
+    <div style="display: flex; flex-flow:column; height: 100%;">
+        <div style="flex: 0 1 auto; flex-wrap: wrap; display: flex; padding: 0.2vw 0 0.5vw 1vw;">
+            <div style="margin: 0.3vw 0 1vw 0">
+                <div style="display: inline-block;"><p class="boldText" style="color: white; overflow:hidden; width: 100%; display: inline-block; margin: 0 0.3vw 0 0;">{{ biosignal.name }}</p></div>
+                <div ng-show="biosignal.isFav" title="Remove biosignal from favorites" ng-click="changeFavStatus(biosignal, biosignal._id)" style="display: inline-block; cursor: pointer; vertical-align: top;"><%= image_tag("fav.png", width: 15) %></div>
+                <div ng-show="!biosignal.isFav" title="Add biosignal to favorites" ng-click="changeFavStatus(biosignal, biosignal._id)" style="display: inline-block; cursor: pointer; vertical-align: top;"><%= image_tag("nofav.png", width: 15) %></div>
+                <div class="trashIcon" title="Delete biosignal" ng-show="!biosignal.isFromGroup" ng-click="preDeleteBiosignal(biosignal, biosignal._id)" style="margin-left: 0.2vw; display: inline-block; cursor: pointer;vertical-align: top;"><%= image_tag("trash.png", width: 15) %></div>
+            </div>
+            <div>
+                <div>
+                    <div style="display: inline-block;"><%= image_tag("calendario.png", width: 15) %></div>
+                    <div style="display: inline-block;"><p class="lightText" style="margin: 0; color: white; overflow:hidden;">{{ biosignal.date | date:'dd/MM/yyyy - HH:mm' }}</p></div>
+                </div>
+                <div style="margin-top: 0.3vw;">
+                    <div style="display: inline-block; vertical-align: top;"><%= image_tag("info.png", width: 15) %></div>
+                    <div style="display: inline-block; width: 10vw;"><p class="lightText" style="margin: 0; color: white; word-wrap: break-word; vertical-align: top; white-space: pre-line">{{ biosignal.notes }}</p></div>
+                </div>
+            </div>
+        </div>
+        <div style="flex: 1 1 auto; display: flex;">
+            <div style="height: 1.2vw; width: 12vw; background-color: #1d1d1d; border-radius: 0 0 0.6vw 0.6vw; padding-left: 0.7vw; cursor: pointer;">
+                <p ng-click="goToSignal(biosignal._id)" class="boldText" style="line-height: 0.2vw; align-self: flex-end; color: #9dffdb; font-size: 0.5vw; vertical-align: bottom;">VISUALIZE</p>
+            </div>
+        </div>
+    </div>
+</div>

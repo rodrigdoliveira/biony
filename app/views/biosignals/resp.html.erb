@@ -1,0 +1,57 @@
+<body ng-app="webBioSPPy" ng-controller="biosignalController" ng-init= '<%="initSignal(\'#{params[:signalId]}\')"%>'>
+    <div ng-show="!loading" ng-cloak style="margin-left: 5vw;">
+        <div ng-click="preChangeXAxis(-1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-top: 1vw; color: #9dffdb; font-size: 0.5vw;">EVERY TIME SCALE</p></div>
+        <div ng-click="preChangeYAxis(-1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-top: 1vw; margin-left: 1vw; color: #9dffdb; font-size: 0.5vw;">EVERY AMPLITUDE</p></div>
+        <div ng-click="resetGraph(-1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-top: 1vw; margin-left: 1vw; color: #9dffdb; font-size: 0.5vw;">RESET ALL</p></div>
+    </div>
+    <div style="min-height: 10vw; margin-left: 5vw; margin-top: 2.5vw; margin-bottom: 5vw; width: 80vw; background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb; padding: 1vw 5vw 1vw 5vw;">
+        <div ng-show="loading" ng-cloak style="position: relative; padding: 1vw;">
+            <div id="innerLoadingDiv" style="position: absolute; left: 50%; transform: translate(-50%, -50%);">
+                <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+            </div>
+        </div>
+        <div ng-show="!loading" ng-cloak>
+            <p class="boldText" style="display:block; color: #9dffdb; font-size: 0.8vw;">{{biosignal.name}}</p>
+            <div>
+                <div style="display: inline-block;"><%= image_tag("calendario.png", width: 15) %></div>
+                <p class="lightText" style="display: inline-block; margin: 0; color: white; overflow:hidden;">{{ biosignal.date | date:'dd/MM/yyyy - HH:mm' }}</p>
+            </div>
+            <div>
+                <div style="display: inline-block; vertical-align: top;"><%= image_tag("info.png", width: 15) %></div>
+                <p class="lightText" style="display: inline-block; margin: 0; color: white; word-wrap: break-word; vertical-align: top;white-space: pre-line">{{ biosignal.notes }}</p>
+            </div>
+            <p class="boldText" style="display:block; color: white; font-size: 0.8vw;">RAW SIGNAL</p>
+            <div id="rawSignal" style="background-color: #111111; height: 15vw; border-radius: 1vw;">
+                <div ng-click="toggleAnnotations(0)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">TOGGLE ANNOTATIONS</p></div>
+                <div ng-click="preCreateAnnotation(0)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">CREATE ANNOTATION</p></div>
+                <div ng-show="signalsData[0].annotations.length > 0" ng-click="listAnnotations(0, biosignal)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">LIST ANNOTATIONS</p></div>
+                <div ng-click="preChangeXAxis(0)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">TIME SCALE</p></div>
+                <div ng-click="preChangeYAxis(0)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">AMPLITUDE</p></div>
+                <div ng-click="resetGraph(0)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">RESET VISUALIZATION</p></div>
+            </div>
+            <p class="boldText" style="display:inline-block; color: white; font-size: 0.8vw;">FILTERED SIGNAL</p>
+            <div id="filteredSignal" style="background-color: #111111; height: 15vw; border-radius: 1vw;">
+                <div ng-click="toggleAnnotations(1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">TOGGLE ANNOTATIONS</p></div>
+                <div ng-click="preCreateAnnotation(1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">CREATE ANNOTATION</p></div>
+                <div ng-show="signalsData[1].annotations.length > 0" ng-click="listAnnotations(1, biosignal)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">LIST ANNOTATIONS</p></div>
+                <div ng-click="preChangeXAxis(1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">TIME SCALE</p></div>
+                <div ng-click="preChangeYAxis(1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">AMPLITUDE</p></div>
+                <div ng-click="resetGraph(1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">RESET VISUALIZATION</p></div>
+            </div>
+            <p class="boldText" style="display:inline-block; color: white; font-size: 0.8vw;">RESPIRATION RATE</p>
+            <div id="respRate" style="background-color: #111111; height: 15vw; border-radius: 1vw;">
+                <div ng-click="toggleAnnotations(2)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">TOGGLE ANNOTATIONS</p></div>
+                <div ng-click="preCreateAnnotation(2)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">CREATE ANNOTATION</p></div>
+                <div ng-show="signalsData[2].annotations.length > 0" ng-click="listAnnotations(2, biosignal)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">LIST ANNOTATIONS</p></div>
+                <div ng-click="preChangeXAxis(2)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">TIME SCALE</p></div>
+                <div ng-click="preChangeYAxis(2)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">AMPLITUDE</p></div>
+                <div ng-click="resetGraph(2)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">RESET VISUALIZATION</p></div>
+            </div>
+        </div>
+    </div>
+    <%= render "biosignals/boxes.html" %>
+</body>
+
+<script>
+    <%= raw Uglifier.new(:mangle => false).compile(render 'resp.js.erb') %>
+</script>

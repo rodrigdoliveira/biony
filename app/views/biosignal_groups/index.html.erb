@@ -1,0 +1,181 @@
+<body ng-app="webBioSPPy" ng-controller="biosignalController"  ng-init= '<%="initBiosignals()"%>'>
+    <div id="tooltipDiv">
+        <div ng-cloak ng-repeat="annotation in annotationTooltipsToShow" class="tooltipInnerDiv" ng-style="{ 'border-color' : annotation.color }" style="max-width: 10vw;">
+            <p style="word-break: break-all; white-space: normal;">
+                From {{annotation.minX}}s to {{annotation.maxX}}s<br><br>
+                {{annotation.description}}
+            </p>
+        </div>
+    </div>
+    <div style="position: relative; padding-bottom: 5vw;display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center;">
+        <div style="">
+            <p class="boldText" style="color: #9dffdb; font-size: 0.8vw; margin-bottom: 0;">{{biosignalGroupName}}</p>
+            <div ng-if="biosignals.length > 0" ng-cloak>
+                <div ng-click="preChangeXAxis(-1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-top: 1vw; color: #9dffdb; font-size: 0.5vw;">EVERY TIME SCALE</p></div>
+                <div ng-click="preChangeYAxis(-1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-top: 1vw; margin-left: 1vw; color: #9dffdb; font-size: 0.5vw;">EVERY AMPLITUDE</p></div>
+                <div ng-click="resetGraph(-1)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-top: 1vw; margin-left: 1vw; color: #9dffdb; font-size: 0.5vw;">RESET ALL</p></div>
+            </div>
+            <% if @biosignalGroup.video? %>
+            <div ng-cloak>
+                <div style="position: relative; min-height: 5vw; margin-top: 1vw; margin-bottom: 0vw; width: 80vw; background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb; padding: 0vw 1vw 1vw 1vw;">
+                    <p class="boldText" style="color: #9dffdb; font-size: 0.8vw; margin-bottom: 0;">ACQUISITION VIDEO</p>
+                    <div style="width: 50%; margin: 0 auto;">
+                        <video id="acquisitionVideo" controls width="640" height="480" src="<%= @biosignalGroup.video %>" type="video/mp4"></video>
+                    </div>
+                    <div id="rangedval" style="margin-bottom: 1vw; color: #9dffdb; font-size: 0.5vw;" ng-cloak>
+                        Acquisition interval: <span id="rangeval"><%= @biosignalGroup.videoActualStart %>s - <%= @biosignalGroup.videoActualEnd %>s (Max: {{totalVideoDuration.toFixed(2)}}s)</span>
+                    </div>
+                    <div id="rangeslider" style="z-index: 0;"></div>
+                </div>
+            </div>
+            <% end %>
+            <div ng-cloak ng-repeat="biosignal in biosignals">
+                <div style="position: relative; min-height: 5vw; margin-top: 1vw; margin-bottom: 0vw; width: 80vw; background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb; padding: 0vw 1vw 1vw 1vw;">
+                    <div ng-show="!biosignal.finishLoad" ng-cloak style="position: relative; padding: 1vw;">
+                        <div class="innerLoadingDiv" style="position: absolute; left: 50%; transform: translate(-50%, -50%);">
+                            <div style="height: 0.5vw;"class="lds-ring"><div></div><div></div><div></div><div></div></div>
+                        </div>
+                    </div>
+                    <div ng-show="biosignal.finishLoad" ng-cloak>
+                        <div style="display: inline-flex; position: relative; padding-right: 1vw;">
+                            <p ng-click="goToSignal(biosignal._id)" class="boldText" style="color: #9dffdb; font-size: 0.8vw; cursor: pointer;">{{biosignal.name}}</p>
+                        </div>
+                        <div ng-click="toggleMetaData($index)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">TOGGLE METADATA</p></div>
+                        <div ng-click="toggleAnnotations($index)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">TOGGLE ANNOTATIONS</p></div>
+                        <div ng-click="preCreateAnnotation($index)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">CREATE ANNOTATION</p></div>
+                        <div ng-show="biosignal.annotations.length > 0" ng-click="listAnnotations($index, biosignal)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">LIST ANNOTATIONS</p></div>
+                        <div ng-click="preChangeXAxis($index)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">TIME SCALE</p></div>
+                        <div ng-click="preChangeYAxis($index)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">AMPLITUDE</p></div>
+                        <div ng-click="resetGraph($index)" style="display:inline-block; cursor: pointer;"><p class="boldText unselectable" style="margin-left: 0.7vw; color: #9dffdb; font-size: 0.5vw;">RESET VISUALIZATION</p></div>
+                        <div ng-attr-id="{{ 'signalMetaData' + $index }}" style="display: none;">
+                            <div>
+                                <div style="display: inline-block;"><%= image_tag("calendario.png", width: 15) %></div>
+                                <p class="lightText" style="display: inline-block; margin: 0; color: white; overflow:hidden;">{{ biosignal.date | date:'dd/MM/yyyy - HH:mm' }}</p>
+                            </div>
+                            <div>
+                                <div style="display: inline-block; vertical-align: top;"><%= image_tag("info.png", width: 15) %></div>
+                                <p class="lightText" style="display: inline-block; margin: 0; color: white; word-wrap: break-word; vertical-align: top;">{{ biosignal.notes }}</p>
+                            </div>
+                            <p class="boldText" style="display:inline-block; color: white; font-size: 0.8vw;">FILTERED SIGNAL</p>
+                        </div>
+                        <div ng-attr-id="{{ 'filteredSignal' + $index }}" style="background-color: #111111; height: 13vw; border-radius: 1vw;"></div>
+                        <div style="position: absolute; top: 0.3vw; right: 1vw;">
+                        <div ng-click="unshare(biosignal._id,$index)" class="whiteToRedBtn" style="display:inline-block; cursor: pointer;">
+                            <p class="boldText" style="margin-left: 0.7vw; font-size: 0.5vw;">REMOVE FROM GROUP</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </div>
+    <div ng-show="listAnnotationsDiv && annotationsToShow.length > 0" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">ANNOTATIONS</p>
+                    <p ng-click="closeListAnnotationsDiv()" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <div ng-repeat="annotation in annotationsToShow">
+                    <div class="tooltip">
+                        <div>
+                            <div style="height: 2vw; display: inline-flex;">
+                                <div style="height: 2vw;">
+                                    <div  ng-style="{ 'background-color' : annotation.color }" style="width: 1vw;  height: 1vw; vertical-align: middle;"></div>
+                                </div>
+                                <p style="margin: 0 0 0 0.3vw; line-height: 1vw; color: white;">From {{annotation.minX}}s to {{annotation.maxX}}s</p>
+                            </div>
+                        </div>
+                        <div class="right" style="width: max-content; padding: 0.3vw 1vw 0.3vw 1vw; transform:translate(105%, -105%); max-width: 10vw;">
+                            <p style="word-break: break-all; white-space: normal;">{{annotation.description}}</p>
+                        </div>
+                    </div>
+                    <div class="trashIcon" ng-click="preDeleteAnnotation(annotation)" style="margin-left: 0.2vw; display: inline-block; cursor: pointer; vertical-align: top; float: right;">
+                        <img ng-src="{{trashIconPNG}}", style ="display: inline-block; width: 1vw; vertical-align: middle;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="changeXaxis" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">CHANGE X AXIS</p>
+                    <p ng-click="changeXaxis = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <input type="number" id="maxXAxis" min="0" placeholder="X Axis Maximum">
+                <div ng-click="xAxisUpdate()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">UPDATE X AXIS</p></div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="changeYaxis" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">CHANGE Y AXIS</p>
+                    <p ng-click="changeYaxis = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <input type="number" id="minYAxis" min="0" placeholder="Y Axis Minimum">
+                <input type="number" id="maxYAxis" min="0" placeholder="Y Axis Maximum">
+                <div ng-click="yAxisUpdate()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">UPDATE Y AXIS</p></div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="createAnnotationBox" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">CREATE ANNOTATION</p>
+                    <p ng-click="createAnnotationBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <div style="width: 100%; margin-bottom: 1vw;">
+                    <input type="number" id="minXAnnotation" min="0" placeholder="Timestamp Minimum">
+                    <input type="number" id="maxXAnnotation" min="0" placeholder="Timestamp Maximum">
+                </div>
+                <textarea id="descriptionAnnotation" style="width: 100%; height: 5vw;" placeholder="Description"></textarea>
+                <div>
+                    <p class="boldText" style="color: white; font-size: 0.8vw; margin-top: 1vw; margin-bottom: 0;">COLOR</p>
+                    <input class="colorInput" id="colorAnnotation" type="color" value= '#ffff00' style="width: 100%;">
+                </div>
+                
+                <div ng-click="createAnnotation()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">SUBMIT</p></div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="deleteAnnotationBox && annotationToDelete" ng-cloak style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.8); width: 100%; height: 100%; display: hidden;">
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1d1d1d; border-radius: 1vw; border: 0.1vw solid #9dffdb;">
+            <div style="position: relative; width: 100%; background-color: rgba(0,0,0,0.5); height: 2vw; border-radius: 1vw 1vw 0 0; color: white;">
+                <div>
+                    <p style="float: left; margin: 0; margin-left: 1vw; line-height: 2vw; font-size: 0.5vw; ">ARE YOU SURE?</p>
+                    <p ng-click="deleteAnnotationBox = false;" style="float: right;margin: 0; margin-right: 1vw; cursor: pointer; line-height: 2vw;">X</p>
+                </div>
+            </div>
+            <div style="padding: 1vw;">
+                <div>
+                    <div style="display: inline-flex;">
+                        <div style="height: 2vw;">
+                            <div  ng-style="{ 'background-color' : annotationToDelete.color }" style="width: 1vw;  height: 1vw; vertical-align: middle;"></div>
+                        </div>
+                        <p style="margin: 0 0 0 0.3vw; line-height: 1vw; color: white;">From {{annotationToDelete.minX}}s to {{annotationToDelete.maxX}}s</p>
+                    </div>
+                    <div style="margin-top: 0.3vw; color: white; max-width: 20vw;">
+                        <p style="word-break: break-all; white-space: normal;">{{annotationToDelete.description}}</p>
+                    </div>
+                </div>
+                <div ng-click="deleteAnnotation()" style="cursor: pointer; margin-top: 2vw;"><p class="boldText" style="color: #9dffdb; font-size: 0.5vw;">DELETE</p></div>
+            </div>
+        </div>
+    </div>  
+</body>
+<script>
+    <%= raw Uglifier.new(:mangle => false).compile(render 'index.js.erb') %>
+</script>
+

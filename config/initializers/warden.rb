@@ -1,0 +1,1 @@
+Warden::Strategies.add(:apiToken, ApiTokenStrategy)
