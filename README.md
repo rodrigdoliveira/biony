@@ -1,5 +1,5 @@
 # Biony
-A Web Application for Biosignal Processing by Rodrigo Oliveira
+A Ruby on Rails Web Application for Biosignal Processing by Rodrigo Oliveira
 
 ## Requirements:
 Ruby 2.6.3p62
